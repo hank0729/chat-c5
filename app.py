@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 from flask import Flask, jsonify, render_template
 import sqlite3
+import pytz
 
 app = Flask(__name__)
 
@@ -14,11 +15,17 @@ def api():
 def get(sensor, location, pm, situation):
     con = sqlite3.connect('data.db')
     cursor = con.cursor()
+    
+    # 獲取 UTC+8 時間
+    tz = pytz.timezone('Asia/Shanghai')
+    utc_8_time = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S')
+    
     cursor.execute("INSERT INTO employees (sensor, location, pm, situation, time) VALUES (?, ?, ?, ?, ?)", 
-                   (sensor, location, pm, situation, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+                   (sensor, location, pm, situation, utc_8_time))
     con.commit()
     con.close()
     return 'succeed'
+
 
     
 @app.route('/fetchdata')
